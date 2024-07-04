@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,9 +10,28 @@
 
     <script src="./js/vue.js"></script>
     <script>
-      const { ref, reactive } = Vue;
+      const { ref, reactive, watch } = Vue;
       const App = {
         setup() {
+          // const idx = ref(0);
+          const data = reactive({idx: 0});
+
+          // watch(idx, (newIdx, oldIdx)=>{
+          //   console.log("new:", newIdx, "old:" ,oldIdx);
+          // });
+
+
+          // 監控reactive的值,只能被getter, 必須要透過函式return才能監控
+          watch(
+            ()=> data.idx, 
+            (newIdx, oldIdx)=>{
+            console.log("new:", newIdx, "old:" ,oldIdx);
+          });
+
+          setInterval(()=>{
+            // idx.value++;
+            data.idx++;
+          }, 1000);
           return {};
         },
       };

@@ -19,6 +19,21 @@
           const refObj = ref({ idx: 0 });
           const reactiveObj = reactive({ idx: 0 });
 
+          // ref 無法監控整個物件的值, 
+          // 但可監控ref單一值的變動,透過一個函式回傳 ()=> refObj.value.idx
+          watch(refObj, (newVal)=> {
+            console.log("refnew:", newVal)
+          });
+          // reactive 可監控整個物件的值
+          watch(reactiveObj, (newVal)=> {
+            console.log("reanew:", newVal)
+          });
+
+          setTimeout(() => {
+            refObj.value.idx = 1;
+            reactiveObj.idx = 1;
+          }, 1000);
+
           return { refObj, reactiveObj };
         },
       };

@@ -43,23 +43,80 @@
   </head>
   <body>
     <div id="app">
-      <div class="box">
+      <div class="box" v-if="isLoad">
         <div>
-          <img class="img" src="" alt="" />
+          <img 
+          v-for="(item, i) in imgArr.arr" 
+          v-show="imgInd === i"
+          :key="item.id" 
+          class="img" 
+          :src="item.photo" 
+          alt="" />
         </div>
         <div class="btnbox">
-          <a href="javascript:;">上一張</a>
-          <a href="javascript:;">下一張</a>
+          <a @click="removeImg" href="javascript:;">上一張</a>
+          <a @click="addImg" href="javascript:;">下一張</a>
         </div>
       </div>
-      <img class="load" src="./images/load.gif" alt="" />
+      <img v-if="!isLoad" class="load" src="./images/load.gif" alt="" />
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
-      const app = {
+      const { onMounted, reactive, ref } = Vue;
+      const app = {        
         setup() {
-          return {};
+          const imgArr = reactive({ arr: [] });
+          const imgInd = ref(0);
+          const isLoad = ref(false);
+
+          const addImg = () => {
+            imgInd.value++;
+            if(imgInd.value > imgArr.arr.length - 1) {
+              imgInd.value = 0;
+            }
+          };
+
+          const removeImg = () =>{
+            imgInd.value--;
+            if(imgInd.value < 0) {
+              imgInd.value = imgArr.arr.length - 1;
+            }
+          };
+
+          const handImgLoad = (imageArr) =>{
+            // console.log(imgArr);
+            let i = 0;  // 記錄image是否有跑完
+            imageArr.forEach(item => {              
+              const newImg = new Image();
+              newImg.src = item.photo;
+              
+              newImg.onload = () => {
+                i++;
+                if(imageArr.length === i) {
+                  // 當載完圖片時...
+                  imgArr.arr = imageArr;
+                  isLoad.value = true;
+                }
+              };
+            });
+          };
+
+          onMounted(()=>{
+            axios.get("https://vue-lessons-api.vercel.app/courses/list")
+            .then((res) =>{
+              handImgLoad(res.data);
+              // imgArr.arr = res.data;
+              console.log(res.data);
+            });
+          });
+          return {
+            imgArr,
+            imgInd,
+            addImg,
+            removeImg,
+            isLoad
+          };
         },
       };
       Vue.createApp(app).mount("#app");

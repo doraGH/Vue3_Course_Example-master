@@ -10,13 +10,21 @@
 
     <script src="./js/vue.js"></script>
     <script>
-      const { ref, reactive } = Vue;
+      const { ref, reactive, watchEffect } = Vue;
       const App = {
         setup() {
           const num = ref(0);
           const numData = reactive({ idx: 0 });
+          let timer = null;
+          const stop = watchEffect(()=>{
+            console.log(num.value);
+            if(num.value >=4) {
+              stop(); // 僅停下監控
+              clearInterval(timer); // 這行才能停下計時器
+            }
+          });
 
-          setTimeout(() => {
+          timer = setInterval(() => {
             num.value++;
             numData.idx++;
           }, 1000);
