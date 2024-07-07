@@ -55,7 +55,7 @@
           <input type="checkbox" id="checkbox" v-model="registered.terms" />
           <label for="checkbox">我已閱讀使用者條款</label>
         </div>
-        <a class="btn">送出</a>
+        <a class="btn" @click="handSubmit">送出</a>
       </div>
       <div>
         <h1>註冊成功</h1>
@@ -86,7 +86,21 @@
             terms: false,
           });
 
-          return { registered };
+          const handSubmit = () => {
+            axios
+              .post(
+                "https://vue-lessons-api.herokuapp.com/auth/registered",
+                registered
+              )
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          };
+
+          return { registered, handSubmit };
         },
       };
 

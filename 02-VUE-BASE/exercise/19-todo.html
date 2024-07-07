@@ -10,28 +10,84 @@
     <div id="app">
       <div class="wait">
         <ul>
-          <li>
-            <img src="" alt="" />
+          <li 
+          v-for="(item, i) in todoList.content" 
+          :key="item.url"
+          @click="handClick(item, i)"
+          >
+            <img :src="item.url" alt="" />
           </li>
         </ul>
       </div>
       <div class="carried">
         <ul>
-          <li>
-            <img alt="" />
+          <li 
+          v-for="(item, i) in finishList.content" 
+          :key="item.url"
+          @click="resetClick(item, i)">
+            <img :src="item.url" alt="" />
           </li>
         </ul>
       </div>
-      <div class="winPage">
+      <div :class="['winPage', {open: isWin}]">
         <h1>闖關成功</h1>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
+      const { reactive, onMounted, watch, ref } = Vue;
       const app = {
         setup() {
-          return {};
+          const todoList = reactive({content: []});
+          const finishList = reactive({content: []});
+
+          const winIdx = ref(0);
+          const isWin = ref(false);
+
+          watch(
+            ()=> finishList.content,
+            (newArr) => {
+              winIdx.value = 0;
+              newArr.forEach((item, i) =>{
+                if(item.idx === i) {
+                  winIdx.value++;
+                }
+              })
+            }, { deep: true }
+          );
+
+          watch(winIdx, (newVal)=> {
+            if(newVal === 9) {
+              isWin.value = true;
+            }
+          });
+
+          const handClick = (item, i)=> {
+            finishList.content.push(item);
+            todoList.content.splice(i, 1);
+          };
+          const resetClick = (item, i)=> {
+            todoList.content.push(item);
+            finishList.content.splice(i, 1);
+          };
+          
+
+          onMounted(()=> {
+            axios.get('./api/puzzle.json')
+            .then((res)=> {
+              todoList.content = res.data;
+              console.log(res.data);
+            });
+          });
+
+          return {
+            todoList,
+            finishList,
+            handClick,
+            resetClick,
+            isWin
+          };
         },
       };
       Vue.createApp(app).mount("#app");

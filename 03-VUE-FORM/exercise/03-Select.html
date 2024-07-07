@@ -10,21 +10,53 @@
   <body>
     <div id="app">
       <div class="select-box">
-        <select>
+        <select v-model="cityActive">
           <option disabled value="">請選擇縣市</option>
+          <option
+            v-for="item in twCity.city"
+            :value="item.name"
+            :key="item.name"
+          >
+            {{item.name}}
+          </option>
         </select>
-        <select>
+        <select v-model="areaActive">
           <option disabled value="">請選擇區域</option>
+          <option v-for="item in twCity.area" :value="item.zip" :key="item.zip">
+            {{ item.name }}
+          </option>
         </select>
       </div>
-      <a class="btn">送出</a>
+      <a class="btn" @click="handSubmit">送出</a>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
     <script src="./js/vue.js"></script>
     <script>
+      const { onMounted, reactive, ref, watch } = Vue;
       const App = {
         setup() {
-          return {};
+          const twCity = reactive({ city: [], area: [] });
+          const cityActive = ref("");
+          const areaActive = ref("");
+
+          watch(cityActive, (newVal) => {
+            const newArr = twCity.city.filter((city) => {
+              return city.name === newVal;
+            });
+            twCity.area = newArr[0].districts;
+            areaActive.value = "";
+          });
+
+          const handSubmit = () => {
+            console.log(cityActive.value, areaActive.value);
+          };
+
+          onMounted(() => {
+            axios.get("./api/TwCities.json").then((res) => {
+              twCity.city = res.data;
+            });
+          });
+          return { twCity, cityActive, areaActive, handSubmit };
         },
       };
 
